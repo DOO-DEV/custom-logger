@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	dsn := fmt.Sprintf("postgres://%s:%s@postgres/%s?sslmode=disable", "hossein", "123456", "task")
+	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", "doo-dev", "123456", "localhost", "task")
 	pgRepo, err := postgres.New(dsn)
 	if err != nil {
 		log.Printf("cant open database: %s", err)
