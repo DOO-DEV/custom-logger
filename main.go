@@ -16,6 +16,7 @@ func main() {
 	if err != nil {
 		log.Printf("cant open database: %s", err)
 	}
+	defer pgRepo.Close()
 
 	myLogger := logger.New(log.New(os.Stdout, "", log.LstdFlags))
 
