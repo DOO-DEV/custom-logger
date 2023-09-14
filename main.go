@@ -19,10 +19,19 @@ func main() {
 
 	myLogger := logger.New(log.New(os.Stdout, "", log.LstdFlags))
 
-	controllers := controller.New(pgRepo, myLogger)
 	app := fiber.New()
 
-	app.Get("/db-health", controllers.CheckDbHealth)
+	app.Use(func(c *fiber.Ctx) error {
+		SetLocal[*postgres.PgDB](c, "db", pgRepo)
+		SetLocal[*logger.Logger](c, "logger", myLogger)
+		return c.Next()
+	})
+	
+	app.Get("/db-health", controller.CheckDbHealth)
 
 	app.Listen(":8080")
+}
+
+func SetLocal[T any](c *fiber.Ctx, key string, value T) {
+	c.Locals(key, value)
 }

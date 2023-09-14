@@ -1,41 +1,28 @@
 package controller
 
 import (
+	"github.com/doo-dev/my-task/db/postgres"
+	"github.com/doo-dev/my-task/logger"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
 )
 
-type Logger interface {
-	Warn(msg string)
-	Error(msg string)
-	Info(msg string)
+func GetLocal[T any](c *fiber.Ctx, key string) T {
+	return c.Locals(key).(T)
 }
 
-type Repository interface {
-	CheckConnection() error
-}
+func CheckDbHealth(c *fiber.Ctx) error {
+	db := GetLocal[*postgres.PgDB](c, "db")
+	lg := GetLocal[*logger.Logger](c, "logger")
 
-type Controller struct {
-	repo   Repository
-	Logger Logger
-}
-
-func New(repo Repository, logger Logger) Controller {
-	return Controller{
-		repo:   repo,
-		Logger: logger,
-	}
-}
-
-func (cl Controller) CheckDbHealth(c *fiber.Ctx) error {
-	if err := cl.repo.CheckConnection(); err != nil {
-		cl.Logger.Error(err.Error())
+	if err := db.CheckConnection(); err != nil {
+		lg.Error(err.Error())
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	cl.Logger.Info("db is up and running")
+	lg.Info("db is up and running")
 	return c.Status(http.StatusOK).JSON(fiber.Map{
 		"message": "everything is good and healthy",
 	})

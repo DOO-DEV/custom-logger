@@ -18,6 +18,6 @@ func New(dsn string) (*PgDB, error) {
 	return &PgDB{db: db}, nil
 }
 
-func (d PgDB) CheckConnection() error {
+func (d *PgDB) CheckConnection() error {
 	return d.db.Ping()
 }
