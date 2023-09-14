@@ -7,23 +7,19 @@ import (
 	"net/http"
 )
 
-func GetLocal[T any](c *fiber.Ctx, key string) T {
-	return c.Locals(key).(T)
-}
+func CheckDbHealth(db *postgres.PgDB, lg *logger.Logger) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		if err := db.CheckConnection(); err != nil {
+			lg.Error(err.Error())
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
 
-func CheckDbHealth(c *fiber.Ctx) error {
-	db := GetLocal[*postgres.PgDB](c, "db")
-	lg := GetLocal[*logger.Logger](c, "logger")
-
-	if err := db.CheckConnection(); err != nil {
-		lg.Error(err.Error())
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
+		lg.Info("db is up and running")
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"message": "everything is good and healthy",
 		})
 	}
 
-	lg.Info("db is up and running")
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"message": "everything is good and healthy",
-	})
 }
