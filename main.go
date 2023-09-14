@@ -22,17 +22,7 @@ func main() {
 
 	app := fiber.New()
 
-	app.Use(func(c *fiber.Ctx) error {
-		SetLocal[*postgres.PgDB](c, "db", pgRepo)
-		SetLocal[*logger.Logger](c, "logger", myLogger)
-		return c.Next()
-	})
-	
-	app.Get("/db-health", controller.CheckDbHealth)
+	app.Get("/db-health", controller.CheckDbHealth(pgRepo, myLogger))
 
 	app.Listen(":8080")
-}
-
-func SetLocal[T any](c *fiber.Ctx, key string, value T) {
-	c.Locals(key, value)
 }
