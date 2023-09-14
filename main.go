@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	dsn := fmt.Sprintf("postgres://%s:%s@postgres/%s?sslmode=disable", "hossein", "123456", "task")
+	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", "doo-dev", "123456", "localhost", "task")
 	pgRepo, err := postgres.New(dsn)
 	if err != nil {
 		log.Printf("cant open database: %s", err)
@@ -22,17 +22,9 @@ func main() {
 
 	app := fiber.New()
 
-	app.Use(func(c *fiber.Ctx) error {
-		SetLocal[*postgres.PgDB](c, "db", pgRepo)
-		SetLocal[*logger.Logger](c, "logger", myLogger)
-		return c.Next()
-	})
-	
-	app.Get("/db-health", controller.CheckDbHealth)
+	app.Get("/db-health", controller.CheckDbHealth(pgRepo, myLogger))
 
-	app.Listen(":8080")
-}
-
-func SetLocal[T any](c *fiber.Ctx, key string, value T) {
-	c.Locals(key, value)
+	if err := app.Listen(":8080"); err != nil {
+		fmt.Println("cant listen on port: ", 8080)
+	}
 }
