@@ -24,5 +24,7 @@ func main() {
 
 	app.Get("/db-health", controller.CheckDbHealth(pgRepo, myLogger))
 
-	app.Listen(":8080")
+	if err := app.Listen(":8080"); err != nil {
+		fmt.Println("cant listen on port: ", 8080)
+	}
 }
