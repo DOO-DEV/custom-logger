@@ -21,3 +21,7 @@ func New(dsn string) (*PgDB, error) {
 func (d *PgDB) CheckConnection() error {
 	return d.db.Ping()
 }
+
+func (d *PgDB) Close() {
+	d.db.Close()
+}
